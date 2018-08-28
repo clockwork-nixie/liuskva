@@ -30,7 +30,24 @@ namespace Liuskva
 
         public void Run(string[] args)
         {
-            Console.WriteLine(Factory.GetInstance<IOedClient>().FetchDesignation("be"));
+            if (args.Length != 2)
+            {
+                throw new ApplicationException("Two argument are required.");
+            }
+            else switch (args[0])
+            {
+                case "entries":
+                    Console.WriteLine(Factory.GetInstance<IOedClient>().FetchEntries(args[1]));
+                    break;
+
+                case "lemma":
+                    Console.WriteLine(Factory.GetInstance<IOedClient>().FetchDesignation(args[1]));
+                    break;
+
+                default:
+                    Console.WriteLine("Unknown directive.");
+                    break;
+            }
         }
     }
 }

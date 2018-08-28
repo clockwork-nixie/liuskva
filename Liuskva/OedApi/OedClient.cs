@@ -16,7 +16,6 @@ namespace Liuskva.OedApi
             {
                 throw new ArgumentNullException(nameof(settings));
             }
-            Console.WriteLine(settings.OedApiUrl);
             _baseUrl = settings.OedApiUrl;
             
             _webClient.Headers.Add(HttpRequestHeader.Accept, "application/json");
@@ -27,9 +26,35 @@ namespace Liuskva.OedApi
 
         public string FetchDesignation(string word)
         {
-            var data = _webClient.DownloadString($"{_baseUrl}/inflections/en/{Uri.EscapeUriString(word)}");
+            string result;
 
-            return data;
+            try
+            {
+                result = _webClient.DownloadString($"{_baseUrl}/inflections/en/{Uri.EscapeUriString(word)}");
+            }
+            catch (WebException exception) when (
+                (exception.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
+            {
+                result = null;
+            }
+            return result;
+        }
+
+
+        public string FetchEntries(string word)
+        {
+            string result;
+
+            try
+            {
+                result = _webClient.DownloadString($"{_baseUrl}/entries/en/{Uri.EscapeUriString(word)}");
+            }
+            catch (WebException exception) when (
+                (exception.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
+            {
+                result = null;
+            }
+            return result;
         }
     }
 }
