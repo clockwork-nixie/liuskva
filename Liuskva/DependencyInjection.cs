@@ -15,7 +15,7 @@ namespace Liuskva
             factory.Register<IBootstrap, Program>();
             factory.RegisterSingleton<IConfiguration, Configuration>();
             factory.Register<IOedClient, OedClient>();
-            factory.RegisterSingleton<ISettings, Settings>();
+            factory.RegisterSingleton<ISettings>(() => new Settings().Initialise(factory.GetInstance<IConfiguration>()));
             
             return factory;
         }

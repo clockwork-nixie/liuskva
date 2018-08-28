@@ -24,7 +24,6 @@ namespace Liuskva
             {
                 _logger.Fatal(exception, "Unhandled top-level exception.");
                 Console.WriteLine($"Unhandled top-level exception: {exception.Message}");
-                throw;
             }
         }
 

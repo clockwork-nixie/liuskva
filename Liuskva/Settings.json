@@ -1,3 +1,4 @@
 {
-    "OedAppId": "https://od-api.oxforddictionaries.com/api/v1"
+    "OedApiUrl": "https://od-api.oxforddictionaries.com/api/v1",
+    "OedStore": true
 }

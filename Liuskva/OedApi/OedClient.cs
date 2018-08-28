@@ -16,6 +16,7 @@ namespace Liuskva.OedApi
             {
                 throw new ArgumentNullException(nameof(settings));
             }
+            Console.WriteLine(settings.OedApiUrl);
             _baseUrl = settings.OedApiUrl;
             
             _webClient.Headers.Add(HttpRequestHeader.Accept, "application/json");

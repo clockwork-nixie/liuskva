@@ -16,16 +16,27 @@ namespace Liuskva
         [NotNull] private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
 
-        private class ImportedSettings
-        {
-            public string OedAppId { get; set; }            
-        }
+        public Settings() { }
 
 
-        public Settings([NotNull] IConfiguration configuration)
+        public Settings Initialise([NotNull] IConfiguration configuration)
         {
             try
-            {
+            {                
+                var settingsFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configuration.PathToSettingsFile);
+                var settingsText = ((File.Exists(settingsFileName)? File.ReadAllText(settingsFileName): null) ?? string.Empty).Trim();
+
+                if (string.IsNullOrWhiteSpace(settingsText))
+                {
+                    throw new ApplicationException($"Settings file is missing or empty: {settingsFileName}");
+                }
+                var settings = JsonConvert.DeserializeObject<Settings>(settingsText);
+
+                foreach (var property in typeof (Settings).GetProperties().Where(p => p != null && p.CanRead && p.CanWrite))
+                {
+                    property.GetSetMethod().Invoke(this, new[] { property.GetGetMethod().Invoke(settings, null) });
+                } 
+
                 var keyFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configuration.PathToSecretDecryptionKeyFile);
                 var keyText = File.Exists(keyFileName)? File.ReadAllLines(keyFileName)?.Where(x => !x.StartsWith("#"))?.FirstOrDefault(): null;
 
@@ -39,29 +50,19 @@ namespace Liuskva
                 {
                     throw new ApplicationException($"Secret key-file does not contain two non-empty keys.");
                 }
-                var settingsFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, configuration.PathToSettingsFile);
-                var settingsText = ((File.Exists(settingsFileName)? File.ReadAllText(settingsFileName): null) ?? string.Empty).Trim();
-
-                if (string.IsNullOrWhiteSpace(settingsText))
-                {
-                    throw new ApplicationException($"Settings file is missing or empty: {settingsFileName}");
-                }
-
-                var settings = JsonConvert.DeserializeObject<ImportedSettings>(settingsText);
-
                 OedAppId = keys[0];
                 OedApiKey = keys[1];
-                OedApiUrl = settings.OedAppId;
             }
             catch (Exception exception)
             {
                 throw new ApplicationException($"Unable to read settings: {exception.Message}", exception);
             }
+            return this;
         }
 
 
-        public string OedApiKey { get; private set; }
-        public string OedApiUrl { get; private set; }
-        public string OedAppId { get; private set; }
+        public string OedApiKey { get; set; }
+        public string OedApiUrl { get; set; }
+        public string OedAppId { get; set; }
     }
 }
